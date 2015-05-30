@@ -13,7 +13,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
     @IBOutlet weak var blurImageView: UIImageView!
     
-    private let originImage = UIImage(named: "逢泽莉娜.jpg")!
+//    private let originImage = UIImage(named: "逢泽莉娜.jpg")!
+    private let originImage = UIImage(named: "cover.png")!
     private var blurImages = [UIImage]()
     
     override func viewDidLoad() {
@@ -35,6 +36,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         activityIndicator.startAnimating()
         
+        let startTime = CFAbsoluteTimeGetCurrent()
+        
         prepareBlurImages({ [unowned self] (resultArray) -> Void in
             self.blurImages = resultArray
             
@@ -42,6 +45,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                 activityIndicator.stopAnimating()
                 
                 self.blurImageView.image = self.originImage
+                
+                let endTime = CFAbsoluteTimeGetCurrent()
+                
+                println(endTime - startTime)
             })
         })
     }
@@ -88,10 +95,17 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     private func prepareBlurImages(completionHandler:(resultArray:[UIImage]) -> Void) {
         var imageArray = [UIImage]()
         
+        var blurRate: CGFloat = 2.0
+        
         dispatch_async(dispatch_get_global_queue(0, 0), { [unowned self] () -> Void in
             for var i = 0; i < 11; i++ {
-                imageArray.append(self.originImage.applyBlurWithRadius(CGFloat(i) * 5, tintColor: UIColor.clearColor(), saturationDeltaFactor: 1.0, maskImage: nil))
-            
+                
+                if let lastImage: UIImage = imageArray.last {
+                    imageArray.append(lastImage.applyBlurWithRadius(CGFloat(blurRate), tintColor: UIColor.clearColor(), saturationDeltaFactor: 1.0, maskImage: nil))
+                } else {
+                    imageArray.append(self.originImage)
+                }
+                
                 if imageArray.count == 11 {
                     completionHandler(resultArray: imageArray)
                 }
