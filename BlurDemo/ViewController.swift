@@ -98,7 +98,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         var blurRate: CGFloat = 2.0
         
         dispatch_async(dispatch_get_global_queue(0, 0), { [unowned self] () -> Void in
+            
+            var dispatchGroup = dispatch_group_create()
+            
             for var i = 0; i < 11; i++ {
+                dispatch_group_enter(dispatchGroup)
                 
                 if let lastImage: UIImage = imageArray.last {
                     imageArray.append(lastImage.applyBlurWithRadius(CGFloat(blurRate), tintColor: UIColor.clearColor(), saturationDeltaFactor: 1.0, maskImage: nil))
@@ -106,9 +110,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                     imageArray.append(self.originImage)
                 }
                 
-                if imageArray.count == 11 {
+                dispatch_group_leave(dispatchGroup)
+//                if imageArray.count == 11 {
+//                    completionHandler(resultArray: imageArray)
+//                }
+            }
+            
+            dispatch_group_notify(dispatchGroup, dispatch_get_main_queue()) {
                     completionHandler(resultArray: imageArray)
-                }
             }
         })
     }
